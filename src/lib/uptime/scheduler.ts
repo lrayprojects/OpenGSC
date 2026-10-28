@@ -519,6 +519,13 @@ async function tick(): Promise<void> {
 
 export function startUptimeScheduler(): void {
   if (started) return;
+  // Continuous HTTP monitoring prevents Railway Serverless from sleeping. Opt out
+  // at runtime without changing stored monitors/history or manual "check now".
+  // Remove this variable (and restart) to restore automatic monitoring.
+  if (process.env.OPENGSC_UPTIME_SCHEDULER_DISABLED === "1") {
+    console.log("[uptime-cron] automatic monitoring disabled by environment");
+    return;
+  }
   started = true;
   console.log("[uptime-cron] scheduler started");
   setTimeout(() => void tick(), FIRST_TICK_MS);
