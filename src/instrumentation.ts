@@ -3,6 +3,12 @@
 // rank tracker position checks).
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
+    // On-demand installations must not poll providers or run scheduled work.
+    // Manual routes and MCP tools remain available; remove the flag to restore schedules.
+    if (process.env.OPENGSC_BACKGROUND_SCHEDULERS_DISABLED === "1") {
+      console.log("[opengsc] background schedulers disabled; on-demand mode");
+      return;
+    }
     const { startClarityScheduler } = await import('@/lib/clarityScheduler');
     startClarityScheduler();
     const { startRankScheduler } = await import('@/lib/rankScheduler');
